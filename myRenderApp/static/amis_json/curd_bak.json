@@ -1,0 +1,178 @@
+{
+    "type": "page",
+    "title": "FisrtModel 管理",
+    "body": [
+      {
+        "type": "crud",
+        "name": "firstCrud",
+        "api": "/amis-api/FisrtModel/",
+        "columns": [
+          {
+            "name": "id",
+            "label": "序号",
+            "type": "text"
+          },
+          {
+            "name": "title",
+            "label": "标题",
+            "type": "text"
+          },
+          {
+            "type": "text",
+            "label": "代码",
+            "name": "code"
+          },
+          {
+            "type": "operation",
+            "label": "操作",
+            "buttons": [
+              {
+                "label": "编辑",
+                "type": "button",
+                "actionType": "dialog",
+                "level": "link",
+                "dialog": {
+                  "title": "编辑",
+                  "body": {
+                    "type": "form",
+                    "api": "PUT:/amis-api/FisrtModel/${id}/",
+                    "body": [
+                      {
+                        "name": "id",
+                        "label": "序号",
+                        "type": "input-text"
+                      },
+                      {
+                        "name": "title",
+                        "label": "标题",
+                        "type": "input-text"
+                      },
+                      {
+                        "label": "代码",
+                        "name": "code",
+                        "type": "input-text"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "label": "查看",
+                "type": "button",
+                "actionType": "dialog",
+                "level": "link",
+                "dialog": {
+                  "title": "查看详情",
+                  "body": {
+                    "type": "form",
+                    "api": "/amis-api/FisrtModel/",
+                    "body": [
+                      {
+                        "name": "id",
+                        "label": "序号",
+                        "type": "static"
+                      },
+                      {
+                        "name": "title",
+                        "label": "标题",
+                        "type": "static"
+                      },
+                      {
+                        "label": "代码",
+                        "name": "code",
+                        "type": "static"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "type": "button",
+                "label": "删除",
+                "actionType": "ajax",
+                "level": "link",
+                "className": "text-danger",
+                "confirmText": "确定要删除？",
+                "api": "DELETE:/amis-api/FisrtModel/${id}/"
+              }
+            ]
+          }
+        ],
+        "bulkActions": [
+          {
+            "type": "button",
+            "level": "danger",
+            "label": "批量删除",
+            "actionType": "ajax",
+            "confirmText": "确定要删除？",
+            "api": "/amis-api/FisrtModel/batch-delete/"
+          }
+        ],
+        "itemActions": [],
+        "headerToolbar": [
+          {
+            "label": "新增",
+            "type": "button",
+            "actionType": "dialog",
+            "level": "primary",
+            "dialog": {
+              "title": "新增",
+              "body": {
+                "type": "form",
+                "api": "POST:/amis-api/FisrtModel/",
+                "body": [
+                  {
+                    "type": "input-text",
+                    "name": "id",
+                    "label": "序号"
+                  },
+                  {
+                    "type": "input-text",
+                    "name": "title",
+                    "label": "标题"
+                  },
+                  {
+                    "type": "input-text",
+                    "name": "code",
+                    "label": "代码"
+                  }
+                ]
+              }
+            }
+          },
+
+          "bulkActions",
+          "pagination",
+          {
+            "type": "wrapper",
+            "className": "ml-auto flex items-center gap-2",
+            "body": {
+              "type": "form",
+              "mode": "inline",
+              "wrapWithPanel": false,
+              "target": "firstCrud",
+              "submitText": "",
+              "title": "",
+              "body": [
+                {
+                  "type": "input-text",
+                  "name": "search",
+                  "placeholder": "请输入关键词搜索",
+                  "clearable": true
+
+                },
+                {
+                  "type": "submit",
+                  "label": "搜索",
+                  "level": "primary"
+           
+                }
+              ],
+              "className": "m-xs p-xs"
+            }
+          }
+        ]
+      }
+    ]
+  }
+  
