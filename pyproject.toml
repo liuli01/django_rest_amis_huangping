@@ -7,6 +7,11 @@ requires-python = ">=3.12"
 dependencies = [
     "django>=5.2",
     "django-amis-render>=0.0.8",
-    "django-amisproxy>=0.2.0",
-    "django-rest-admin-plus>=0.1.0",
+    "django-amisproxy>=0.3.0",
+    "django-apscheduler>=0.7.0",
+    "django-rest-admin-plus>=0.2.0",
+    "drf-api-logger>=1.1.19",
+    "psycopg2-binary>=2.9.10",
+    "python-dotenv>=1.1.1",
+    "whitenoise>=6.9.0",
 ]

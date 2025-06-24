@@ -25,7 +25,7 @@ API_PROXY_TARGET = 'http://localhost:8000/api/'
 3. 项目路由mysite/urls.py:
 ```
 path('amis-api/', include('amisproxy.urls')),
-````
+```
 4. 数据迁移
 ```
 manage.py migrate 
@@ -81,15 +81,17 @@ DJANGO_REST_ADMIN_TO_APP='rest_admin_app'
 REST_FRAMEWORK = {
     "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
     'DEFAULT_AUTHENTICATION_CLASSES': [],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination', #分页
-    'PAGE_SIZE': 10, # 每页显示个数
+    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination', # drf默认分页
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 30, # 每页显示个数
 }
 
+```
 # 修改中文
 LANGUAGE_CODE = 'zh-hans'
 # 修改上海时间
 TIME_ZONE = 'Asia/Shanghai'
-```
+
 
 ## 3、修改路由mysite/urls.py
 ```
@@ -114,44 +116,58 @@ class FisrtModel(models.Model):
         managed = True
         db_table = 'fisrt_model'
 ```
-
 ## 5、 创建示例前端CURD表单 myRenderApp/static/amis_json/curd_bak.json  
 ```
 https://gitee.com/liulipython/file/raw/master/amis_json/curd_bk.json
 
 ```
 
-```
 ## 创建迁移文件
+```
 python manage.py makemigrations
 python manage.py migrate
-``
+```
 ## 创建用户
 ```
 python manage.py createsuperuser --username admin --email 525334480@qq.com
+```
 ## 修改密码
 ```
 python manage.py changepassword admin
 ```
 ## 最终访问
+```
 /admin 生成rest服务，生成json服务
 /amis-api/ 替换 django-rest-admin的服务地址/api/进行访问
-
-
-## mysqlclient(C语言开发)
+```
+## 数据库
+# 优先使用postgresql的驱动安装（支持时区）
+```
+uv add psycopg2-binary
+```
+# 慎用mysqlclient(C语言开发速度快，不支持时区，TZ=False，会报错)
 ```
 apt-get install python3-dev default-libmysqlclient-dev build-essential pkg-confi
 uv add mysqlclient
-
 ```
+## 
+
+
+# 慎用mysqlclient(C语言开发速度快，不支持时区，TZ=False，会报错)
+```
+apt-get install python3-dev default-libmysqlclient-dev build-essential pkg-confi
+uv add mysqlclient
+```
+## 
+
 
 ## git第三方包本地调试，在manage.py 加上
 ```
 # 获取 django_rest_admin 的绝对路径
 package_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'django_rest_admin'))
-
+```
 # 将路径添加到 sys.path 中
+```
 if package_path not in sys.path:
     sys.path.insert(0, package_path)
-
 ```
