@@ -16,6 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
+from rest_admin_app.views_echarts import site_obj 
+
+from rest_admin_app.views import (
+    CleanedDataCompareView,
+    CleanedDataExportView,
+    FilterOptionsView
+)
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -23,4 +31,11 @@ urlpatterns = [
     path('render/', include('myRenderApp.urls')),
     path('api/', include('rest_admin_app.urls')),
     path('amis-api/', include('amisproxy.urls')),
+    path("api/cleaned-data/compare/", CleanedDataCompareView.as_view(), name="cleaned_data_compare"),
+    path("api/cleaned-data/export/", CleanedDataExportView.as_view(), name="cleaned_data_export"),
+    path("api/filter-options/", FilterOptionsView.as_view(), name="filter_options"),
+    path('echarts/', include(site_obj.urls)), 
+
 ]
+
+

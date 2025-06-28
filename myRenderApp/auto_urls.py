@@ -8,5 +8,7 @@ from django_amis_render.jhtml_render import jhtml_render, render_template_json
 auto_urlpatterns=[
     path('curd_bak/', lambda req: jhtml_render(request=req,file_type='json', json_file_url='/static/amis_json/curd_bak.json', html_template=None,  json_render_dict=None, json_render_func=None, file_path='myRenderApp/static/amis_json/curd_bak.json', url_name='curd_bak', app_name='myRenderApp'), name='curd_bak'), 
     path('test/', lambda req: jhtml_render(request=req,file_type='json', json_file_url='/static/amis_json/test.json', html_template=None,  json_render_dict=None, json_render_func=None, file_path='myRenderApp/static/amis_json/test.json', url_name='test', app_name='myRenderApp'), name='test'), 
+    path('chart/', lambda req: jhtml_render(request=req,file_type='json', json_file_url='/static/amis_json/chart.json', html_template=None,  json_render_dict=None, json_render_func=None, file_path='myRenderApp/static/amis_json/chart.json', url_name='chart', app_name='myRenderApp'), name='chart'), 
+    path('chart2/', lambda req: jhtml_render(request=req,file_type='json', json_file_url='/static/amis_json/chart2.json', html_template=None,  json_render_dict=None, json_render_func=None, file_path='myRenderApp/static/amis_json/chart2.json', url_name='chart2', app_name='myRenderApp'), name='chart2'), 
 ]#auto_urlpatterns end
 

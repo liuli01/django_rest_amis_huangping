@@ -1,0 +1,226 @@
+{
+  "type": "page",
+  "title": "AIMS数据可视化系统",
+  "body": [
+    {
+      "type": "row",
+      "gutter": 24,
+      "body": [
+        {
+          "type": "col",
+          "md": 4,
+          "body": [
+            {
+              "type": "card",
+              "title": "筛选条件",
+              "body": [
+                {
+                  "type": "form",
+                  "api": "/api/data/query/",
+                  "mode": "inline",
+                  "body": [
+                    {
+                      "type": "select",
+                      "name": "device_id",
+                      "label": "设备",
+                      "url": "/api/filter/options/",
+                      "source": {
+                        "method": "get",
+                        "data": {
+                          "key": "devices"
+                        }
+                      },
+                      "labelField": "label",
+                      "valueField": "value",
+                      "defaultValue": "${devices[0].value}",
+                      "onChange": [
+                        {
+                          "action": "reload",
+                          "componentId": "e-key-select"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "select",
+                      "name": "e_key",
+                      "label": "数据类型",
+                      "id": "e-key-select",
+                      "url": "/api/filter/options/",
+                      "source": {
+                        "method": "get",
+                        "data": {
+                          "key": "e_keys",
+                          "device_id": "${formData.device_id}"
+                        }
+                      },
+                      "labelField": "label",
+                      "valueField": "value",
+                      "defaultValue": "${e_keys[0].value}",
+                      "disabled": "${!formData.device_id}"
+                    },
+                    {
+                      "type": "select",
+                      "name": "methods[]",
+                      "label": "清洗方法",
+                      "multiple": true,
+                      "url": "/api/filter/options/",
+                      "source": {
+                        "method": "get",
+                        "data": {
+                          "key": "methods"
+                        }
+                      },
+                      "labelField": "label",
+                      "valueField": "value",
+                      "defaultValue": "${methods[0].value}",
+                      "size": 4
+                    },
+                    {
+                      "type": "datetime-picker",
+                      "name": "start",
+                      "label": "开始时间",
+                      "format": "YYYY-MM-DD HH:mm",
+                      "defaultValue": "${moment().subtract(1, 'days').format('YYYY-MM-DD 00:00')}"
+                    },
+                    {
+                      "type": "datetime-picker",
+                      "name": "end",
+                      "label": "结束时间",
+                      "format": "YYYY-MM-DD HH:mm",
+                      "defaultValue": "${moment().format('YYYY-MM-DD HH:mm')}"
+                    },
+                    {
+                      "type": "button-group",
+                      "body": [
+                        {
+                          "type": "button",
+                          "label": "查询",
+                          "actionType": "submit",
+                          "icon": "fa fa-search",
+                          "level": "primary"
+                        },
+                        {
+                          "type": "button",
+                          "label": "重置",
+                          "actionType": "reset",
+                          "icon": "fa fa-refresh"
+                        },
+                        {
+                          "type": "button",
+                          "label": "导出数据",
+                          "icon": "fa fa-download",
+                          "level": "secondary",
+                          "action": [
+                            {
+                              "actionType": "ajax",
+                              "url": "/api/data/export/",
+                              "method": "get",
+                              "data": "${formData}",
+                              "target": "_blank",
+                              "success": {
+                                "message": "数据导出成功"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "col",
+          "md": 8,
+          "body": [
+            {
+              "type": "card",
+              "title": "数据曲线对比",
+              "body": [
+                {
+                  "type": "chart",
+                  "options": {
+                    "legend": {
+                      "data": "${chart.legend}"
+                    },
+                    "tooltip": {
+                      "trigger": "axis"
+                    },
+                    "xAxis": {
+                      "type": "category",
+                      "data": "${chart.xAxis}"
+                    },
+                    "yAxis": {
+                      "type": "value"
+                    },
+                    "series": "${chart.series}"
+                  },
+                  "loading": true,
+                  "api": "/api/data/compare/"
+                }
+              ]
+            },
+            {
+              "type": "card",
+              "title": "数据表格",
+              "body": [
+                {
+                  "type": "table",
+                  "api": "/api/data/compare/",
+                  "columns": [
+                    {
+                      "name": "datetime",
+                      "label": "时间",
+                      "sortable": true
+                    },
+                    {
+                      "name": "raw",
+                      "label": "原始值",
+                      "sortable": true
+                    },
+                    {
+                      "name": "${methods[*].method_key}",
+                      "label": "${methods[*].method_name}",
+                      "sortable": true
+                    }
+                  ],
+                  "operations": [
+                    {
+                      "label": "导出",
+                      "icon": "fa fa-download",
+                      "action": [
+                        {
+                          "actionType": "ajax",
+                          "url": "/api/data/export/",
+                          "method": "get",
+                          "data": "${formData}",
+                          "target": "_blank",
+                          "success": {
+                            "message": "数据导出成功"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "rowKey": "datetime"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "theme": {
+    "primaryColor": "#3b82f6",
+    "card": {
+      "borderRadius": 8,
+      "boxShadow": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
+    },
+    "font": {
+      "family": "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu"
+    }
+  }
+}

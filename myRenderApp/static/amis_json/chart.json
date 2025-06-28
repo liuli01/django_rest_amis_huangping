@@ -1,0 +1,146 @@
+{
+  "type": "page",
+  "title": "设备数据清洗对比分析",
+  "body": [
+    {
+      "type": "form",
+      "title": null,
+      "mode": "horizontal",
+      "wrapWithPanel": false,
+      "target": "dataService",
+      "submitText": "查询",
+      "controls": [
+        {
+          "type": "select",
+          "name": "device_id",
+          "label": "设备",
+          "source": "/api/devices/",
+          "required": true,
+          "onChange": {
+            "actionType": "reload",
+            "componentId": "eKeySelect"
+          }
+        },
+        {
+          "type": "select",
+          "name": "e_key",
+          "label": "参数",
+          "id": "eKeySelect",
+          "source": {
+            "url": "/api/e-keys/?device_id=&{device_id}"
+          },
+          "required": true,
+          "onChange": {
+            "actionType": "reload",
+            "componentId": "eKeySelect"
+          }
+        },
+        {
+          "type": "select",
+          "name": "methods",
+          "label": "清洗方法",
+          "multiple": true,
+          "clearable": true,
+          "source": "/api/methods/",
+          "required": true
+        },
+        {
+          "type": "input-datetime",
+          "name": "start",
+          "label": "开始时间",
+          "value": "-1hours",
+          "required": true
+        },
+        {
+          "type": "input-datetime",
+          "name": "end",
+          "label": "结束时间",
+          "value": "",
+          "required": true
+        },
+        {
+          "type": "button",
+          "label": "导出 Excel",
+          "actionType": "download",
+          "level": "default",
+          "api": {
+            "method": "get",
+            "url": "/api/cleaned-data/export?device_id=${device_id}&e_key=${e_key}&start=${start}&end=${end}&methods[]=${methods}"
+          }
+        }
+      ]
+    },
+    {
+      "type": "service",
+      "id": "dataService",
+      "schemaApi": {
+        "url": "/api/cleaned-data/compare",
+        "method": "get",
+        "data": {
+          "device_id": "${device_id}",
+          "e_key": "${e_key}",
+          "start": "${start}",
+          "end": "${end}",
+          "methods[]": "${methods}"
+        }
+      },
+      "body": [
+        {
+          "type": "chart",
+          "api": {
+            "url": "/api/cleaned-data/compare",
+            "method": "get",
+            "data": {
+              "device_id": "${device_id}",
+              "e_key": "${e_key}",
+              "start": "${start}",
+              "end": "${end}",
+              "methods[]": "${methods}"
+            }
+          },
+          "config": {
+            "type": "line",
+            "xAxis": {
+              "type": "category",
+              "data": "${chart.xAxis}"
+            },
+            "legend": {
+              "data": "${chart.legend}"
+            },
+            "yAxis": {
+              "type": "value"
+            },
+            "series": "${chart.series}"
+          }
+        },
+        {
+          "type": "table",
+          "source": "${table}",
+          "columnsTogglable": false,
+          "columns": [
+            {
+              "name": "datetime",
+              "label": "时间"
+            },
+            {
+              "name": "raw",
+              "label": "原始值"
+            },
+            {
+              "label": "滑动平均",
+              "name": "moving_avg"
+            },
+            {
+              "label": "Z-Score",
+              "name": "zscore"
+            },
+            {
+              "label": "中值滤波",
+              "name": "median"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

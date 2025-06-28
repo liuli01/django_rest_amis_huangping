@@ -171,3 +171,15 @@ package_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'django_r
 if package_path not in sys.path:
     sys.path.insert(0, package_path)
 ```
+
+# 静态资源
+```
+python manage.py collectstatic
+```
+
+# 项目运行任务
+## 初始化数据清洗数据库
+```
+python manage.py runapscheduler
+python manage.py init_clean_methods_and_devices
+```

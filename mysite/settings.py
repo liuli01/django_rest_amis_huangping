@@ -58,6 +58,9 @@ INSTALLED_APPS = [
     "django_apscheduler",
     "drf_api_logger",
 
+    'django_echarts',
+    'django_echarts.contrib.bootstrap5',
+
 ]
 
 
@@ -192,10 +195,16 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
+DJANGO_ECHARTS = {
+}
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
         'file': {
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'django.log',
@@ -215,7 +224,7 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['file'],
+            'handlers': ['file','console'],
             'level': 'INFO',
             'propagate': False,
         },
