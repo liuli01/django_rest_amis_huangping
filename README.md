@@ -183,3 +183,9 @@ python manage.py collectstatic
 python manage.py runapscheduler
 python manage.py init_clean_methods_and_devices
 ```
+
+# 项目地址
+```
+http://127.0.0.1:8000/echarts/chart/device_raw_vs_cleaned/
+http://127.0.0.1:8000/water-quality/
+```

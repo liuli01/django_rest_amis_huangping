@@ -69,7 +69,7 @@
           "name": "chartFrame",
           "className": "w-full",
           "height": 600,
-          "src": "/echarts/chart/device_raw_vs_cleaned/?device_name=${device_name}&e_name=${e_name}&method_name=${method_name}"
+          "src": "http://127.0.0.1:8000/echarts/chart/device_raw_vs_cleaned/device_name/${device_name}/e_name/${e_name}/method_name/${method_name}/"
         }
       ]
     }

@@ -189,4 +189,8 @@ class FilterOptionsView(APIView):
 
 
 
+# water_monitor/views.py
+from django.shortcuts import render
 
+def water_quality_view(request):
+    return render(request, 'water_quality_monitoring.html')

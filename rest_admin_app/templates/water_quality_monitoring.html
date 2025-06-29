@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水质监测数据展示</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            display: flex;          /* 使用Flexbox布局 */
+            gap: 15px;              /* 元素间间距 */
+            flex-wrap: wrap;        /* 允许换行 */
+        }
+        .control-group {
+            flex: 1;                /* 平均分配宽度 */
+            min-width: 200px;       /* 最小宽度，确保在小屏幕上正常显示 */
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .fullscreen-btn {
+            margin-top: 10px;
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .fullscreen-btn:hover {
+            background-color: #45a049;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h3>水质监测数据展示</h3>
+        
+        <div class="controls">
+            <form id="chartForm" style="width: 100%; display: flex; gap: 15px; flex-wrap: wrap;">
+                <div class="control-group">
+                    <label for="device">选择设备:</label>
+                    <select id="device" name="device">
+                        <option value="管网监测点2">管网监测点2</option>
+                        <option value="管网监测点5">管网监测点5</option>
+                        <option value="管网监测点3">管网监测点3</option>
+                        <option value="管网监测点1">管网监测点1</option>
+                        <option value="管网监测点4">管网监测点4</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="indicator">选择指标:</label>
+                    <select id="indicator" name="indicator">
+                        <option value="COD">COD</option>
+                        <option value="ORP">ORP</option>
+                        <option value="信号强度">信号强度</option>
+                        <option value="氨氮">氨氮</option>
+                        <option value="水位">水位</option>
+                        <option value="水温">水温</option>
+                        <option value="流速">流速</option>
+                        <option value="流量">流量</option>
+                        <option value="电压">电压</option>
+                        <option value="电导率">电导率</option>
+                        <option value="累计流量">累计流量</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="method">选择清洗方法:</label>
+                    <select id="method" name="method">
+                        <option value="中值滤波">中值滤波</option>
+                        <option value="Z-Score滤波">Z-Score滤波</option>
+                        <option value="滑动平均">滑动平均</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        
+        <button id="fullscreenBtn" class="fullscreen-btn">全屏显示</button>
+        
+        <iframe id="chartFrame" src="http://127.0.0.1:8000/echarts/chart/device_raw_vs_cleaned/device_name/管网监测点2/e_name/COD/method_name/Z-Score滤波/" 
+                allowfullscreen></iframe>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const deviceSelect = document.getElementById('device');
+        const indicatorSelect = document.getElementById('indicator');
+        const methodSelect = document.getElementById('method');
+        const chartFrame = document.getElementById('chartFrame');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        
+        // 监听下拉框变化事件
+        deviceSelect.addEventListener('change', updateChart);
+        indicatorSelect.addEventListener('change', updateChart);
+        methodSelect.addEventListener('change', updateChart);
+        
+        // 更新iframe中的图表URL
+        function updateChart() {
+            const device = encodeURIComponent(deviceSelect.value);
+            const indicator = encodeURIComponent(indicatorSelect.value);
+            const method = encodeURIComponent(methodSelect.value);
+            
+            const chartUrl = `http://127.0.0.1:8000/echarts/chart/device_raw_vs_cleaned/device_name/${device}/e_name/${indicator}/method_name/${method}/`;
+            chartFrame.src = chartUrl;
+        }
+        
+        // 全屏控制
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+        
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                // 进入全屏
+                if (chartFrame.requestFullscreen) {
+                    chartFrame.requestFullscreen();
+                } else if (chartFrame.webkitRequestFullscreen) { /* Safari */
+                    chartFrame.webkitRequestFullscreen();
+                } else if (chartFrame.msRequestFullscreen) { /* IE11 */
+                    chartFrame.msRequestFullscreen();
+                }
+                fullscreenBtn.textContent = '退出全屏';
+            } else {
+                // 退出全屏
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) { /* Safari */
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { /* IE11 */
+                    document.msExitFullscreen();
+                }
+                fullscreenBtn.textContent = '全屏显示';
+            }
+        }
+        
+        // 监听全屏状态变化
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+        document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+        
+        function handleFullscreenChange() {
+            if (document.fullscreenElement) {
+                fullscreenBtn.textContent = '退出全屏';
+            } else {
+                fullscreenBtn.textContent = '全屏显示';
+            }
+        }
+    </script>
+</body>
+</html>    
