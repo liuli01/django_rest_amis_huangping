@@ -1,5 +1,5 @@
 # ...
-from django_echarts.starter.sites import DJESite
+from django_echarts.starter.sites import DJESite,SiteOpts
 from django_echarts.entities import Copyright
 from pyecharts import options as opts
 from pyecharts.charts import Bar
@@ -46,7 +46,7 @@ method_name_list = list(method_name_list)
 # print(f"指标列表: {e_name_list}")
 # print(f"清洗方法列表: {method_name_list}")
 
-site_obj = DJESite(site_title="设备数据平台",ignore_register_nav=True)
+site_obj = DJESite(site_title='',ignore_register_nav=True,opts=SiteOpts(nav_shown_pages=[]))
 @site_obj.register_chart(title='{device_name}-{e_name}指标-{method_name}数据清洗', params_config=ParamsConfig({
     'device_name': device_name_list,
     'e_name': e_name_list,

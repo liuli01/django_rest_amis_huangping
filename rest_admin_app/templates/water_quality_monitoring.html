@@ -3,28 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>水质监测数据展示</title>
+    <title>数据可视化控制面板</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            padding: 10px;
+            position: relative; /* 为全屏按钮的绝对定位提供参考 */
         }
         .container {
             max-width: 1200px;
             margin: 0 auto;
         }
         .controls {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             padding: 15px;
             background-color: #f8f9fa;
             border-radius: 5px;
-            display: flex;          /* 使用Flexbox布局 */
-            gap: 15px;              /* 元素间间距 */
-            flex-wrap: wrap;        /* 允许换行 */
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
         }
         .control-group {
-            flex: 1;                /* 平均分配宽度 */
-            min-width: 200px;       /* 最小宽度，确保在小屏幕上正常显示 */
+            flex: 1;
+            min-width: 200px;
         }
         label {
             display: block;
@@ -38,20 +40,24 @@
             border-radius: 4px;
         }
         .fullscreen-btn {
-            margin-top: 10px;
+            position: fixed; /* 固定在视窗中 */
+            bottom: 20px;    /* 距离底部20px */
+            right: 20px;     /* 距离右侧20px */
             padding: 8px 15px;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            z-index: 100;    /* 确保按钮在最上层 */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* 添加阴影增强视觉效果 */
         }
         .fullscreen-btn:hover {
             background-color: #45a049;
         }
         iframe {
             width: 100%;
-            height: 600px;
+            height: 800px;
             border: 1px solid #ddd;
             border-radius: 5px;
         }
@@ -59,18 +65,18 @@
 </head>
 <body>
     <div class="container">
-        <h3>水质监测数据展示</h3>
+        <!-- 移除了标题元素 -->
         
         <div class="controls">
             <form id="chartForm" style="width: 100%; display: flex; gap: 15px; flex-wrap: wrap;">
                 <div class="control-group">
                     <label for="device">选择设备:</label>
                     <select id="device" name="device">
-                        <option value="管网监测点2">管网监测点2</option>
-                        <option value="管网监测点5">管网监测点5</option>
+                        <option value="管网监测点2">管网监测点1</option>
+                        <option value="管网监测点5">管网监测点2</option>
                         <option value="管网监测点3">管网监测点3</option>
-                        <option value="管网监测点1">管网监测点1</option>
-                        <option value="管网监测点4">管网监测点4</option>
+                        <option value="管网监测点1">管网监测点4</option>
+                        <option value="管网监测点4">管网监测点5</option>
                     </select>
                 </div>
                 
@@ -79,15 +85,15 @@
                     <select id="indicator" name="indicator">
                         <option value="COD">COD</option>
                         <option value="ORP">ORP</option>
-                        <option value="信号强度">信号强度</option>
                         <option value="氨氮">氨氮</option>
+                        <option value="电导率">电导率</option>
                         <option value="水位">水位</option>
-                        <option value="水温">水温</option>
                         <option value="流速">流速</option>
                         <option value="流量">流量</option>
-                        <option value="电压">电压</option>
-                        <option value="电导率">电导率</option>
                         <option value="累计流量">累计流量</option>
+                        <option value="水温">水温</option>
+                        <option value="电压">电压</option>
+                        <option value="信号强度">信号强度</option>
                     </select>
                 </div>
                 
@@ -102,11 +108,14 @@
             </form>
         </div>
         
-        <button id="fullscreenBtn" class="fullscreen-btn">全屏显示</button>
+        <!-- 移除了原来的按钮位置 -->
         
-        <iframe id="chartFrame" src="http://127.0.0.1:8000/echarts/chart/device_raw_vs_cleaned/device_name/管网监测点2/e_name/COD/method_name/Z-Score滤波/" 
+        <iframe id="chartFrame" src="http://127.0.0.1:8000/echarts/chart/device_raw_vs_cleaned/device_name/管网监测点1/e_name/COD/method_name/中值滤波/" 
                 allowfullscreen></iframe>
     </div>
+
+    <!-- 将按钮移到iframe之后 -->
+    <button id="fullscreenBtn" class="fullscreen-btn">全屏显示</button>
 
     <script>
         // 获取DOM元素
@@ -173,4 +182,4 @@
         }
     </script>
 </body>
-</html>    
+</html>
