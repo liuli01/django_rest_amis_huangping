@@ -31,5 +31,5 @@ EXPOSE 8000
 # 启动 Gunicorn 和 Nginx
 # CMD ["sh", "-c", "gunicorn mysite.wsgi:application --bind 0.0.0.0:8000 & nginx -g 'daemon off;'"]  
 # 普通启动 
-# CMD ["python", "manage.py", "runserver","0.0.0.0:8000"]
-CMD ["sh", "-c", "python manage.py migrate && gunicorn mysite.wsgi:application --bind 0.0.0.0:8000"]
+CMD ["python", "manage.py", "runserver","0.0.0.0:8000"]
+# CMD ["sh", "-c", "python manage.py migrate && gunicorn mysite.wsgi:application --bind 0.0.0.0:8000"]
