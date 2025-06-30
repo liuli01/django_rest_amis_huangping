@@ -54,7 +54,7 @@ def fetch_device_data():
 @close_old_connections
 def clean_device_data():
     """
-    清洗最近2小时的原始数据，写入 CleanedData 表
+    清洗最近2小时的原始数据,写入 CleanedData 表
     """
     logger.info("[任务] 开始执行数据清洗任务...")
     try:

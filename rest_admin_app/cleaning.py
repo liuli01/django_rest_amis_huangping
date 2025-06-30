@@ -4,10 +4,10 @@ import numpy as np
 import pandas as pd
 
 def moving_average(values, window=3):
-    return pd.Series(values).rolling(window=window, min_periods=1).mean().tolist()
+    return pd.Series(values).rolling(window=window, min_periods=10).mean().tolist()
 
 def median_filter(values, window=3):
-    return pd.Series(values).rolling(window=window, min_periods=1, center=True).median().tolist()
+    return pd.Series(values).rolling(window=window, min_periods=10, center=True).median().tolist()
 
 def z_score_filter(values, threshold=2.0):
     series = pd.Series(values)
