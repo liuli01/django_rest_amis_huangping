@@ -83,9 +83,9 @@
                 <div class="control-group">
                     <label for="indicator">选择指标:</label>
                     <select id="indicator" name="indicator">
+                        <option value="氨氮">氨氮</option>
                         <option value="COD">COD</option>
                         <option value="ORP">ORP</option>
-                        <option value="氨氮">氨氮</option>
                         <option value="电导率">电导率</option>
                         <option value="水位">水位</option>
                         <option value="流速">流速</option>
@@ -100,9 +100,18 @@
                 <div class="control-group">
                     <label for="method">选择清洗方法:</label>
                     <select id="method" name="method">
-                        <option value="中值滤波">中值滤波</option>
-                        <option value="Z-Score滤波">Z-Score滤波</option>
-                        <option value="滑动平均">滑动平均</option>
+                        <option value="多项式拟合">多项式拟合</option>
+                        <option value="SG滤波">SG滤波</option>
+                        <option value="指数加权移动平均">指数加权移动平均</option>
+                        <option value="中值+滑动平均组合滤波">中值+滑动平均组合滤波</option>
+                        <option value="LOWESS局部回归拟合">LOWESS局部回归拟合</option>
+                        <option value="三次样条拟合">三次样条拟合</option>
+                        
+                        
+                        <!-- <option value="中值滤波">中值滤波</option> -->
+                        <!-- <option value="Z-Score滤波">Z-Score滤波</option>
+                        <option value="滑动平均">滑动平均</option> -->
+
                     </select>
                 </div>
             </form>
@@ -110,7 +119,7 @@
         
         <!-- 移除了原来的按钮位置 -->
         
-        <iframe id="chartFrame" src="http://127.0.0.1:8000/echarts/chart/device_raw_vs_cleaned/device_name/管网监测点1/e_name/COD/method_name/中值滤波/" 
+        <iframe id="chartFrame" src="http://127.0.0.1:8000/echarts/chart/device_raw_vs_cleaned/device_name/管网监测点1/e_name/氨氮/method_name/SG滤波/" 
                 allowfullscreen></iframe>
     </div>
 

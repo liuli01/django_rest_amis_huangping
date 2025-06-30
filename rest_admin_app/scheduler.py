@@ -54,7 +54,7 @@ def fetch_device_data():
 @close_old_connections
 def clean_device_data():
     """
-    清洗最近2小时的原始数据,写入 CleanedData 表
+    清洗最近2小时的原始数据写入 CleanedData 表
     """
     logger.info("[任务] 开始执行数据清洗任务...")
     try:
@@ -103,3 +103,94 @@ def clean_device_data():
         logger.error(f"[致命错误] 数据清洗任务执行失败: {e}")
     else:
         logger.info("[任务] 数据清洗完成。")
+
+
+
+
+
+@close_old_connections
+def history_trend_clean_all(method_keys=["trend_fit", "savgol","ewma","median_avg","lowess","spline"]):
+    """
+    对所有设备、所有参数的历史数据执行 trend_fit、savgol 等趋势拟合清洗，并批量写入 CleanedData 表
+    """
+    logger.info("[任务] 开始执行历史趋势拟合清洗任务...")
+    try:
+        # 拉取数据库中已注册的方法对象
+        method_map = {
+            m.method_key: m
+            for m in RestAdminAppCleanmethod.objects.filter(method_key__in=method_keys)
+        }
+
+        # 检查未注册的方法
+        for key in method_keys:
+            if key not in CLEAN_METHODS:
+                logger.warning(f"[跳过] 清洗方法 {key} 未在 CLEAN_METHODS 中注册")
+            elif key not in method_map:
+                logger.warning(f"[跳过] 清洗方法 {key} 未在数据库中注册")
+
+        devices = RestAdminAppDevice.objects.all()
+
+        for device in devices:
+            try:
+                raw_qs = RestAdminAppRawdata.objects.filter(device=device).order_by("datetime")
+                if not raw_qs.exists():
+                    continue
+
+                # 按 e_key 分组
+                data_grouped = defaultdict(list)
+                for data in raw_qs:
+                    data_grouped[data.e_key].append(data)
+
+                for e_key, data_list in data_grouped.items():
+                    datetimes = [d.datetime for d in data_list]
+                    values = [d.e_value for d in data_list]
+
+                    for method_key in method_keys:
+                        method_def = CLEAN_METHODS.get(method_key)
+                        method_obj = method_map.get(method_key)
+
+                        if not method_def or not method_obj:
+                            continue
+
+                        clean_func = method_def["func"]
+
+                        try:
+                            cleaned_values = clean_func(values)
+                        except Exception as e:
+                            logger.error(f"[错误] 方法 {method_key} 拟合失败 (设备: {device.device_id}, 参数: {e_key}): {e}")
+                            continue
+
+                        # 已有记录的时间点集合（用于去重）
+                        existing_times = set(
+                            RestAdminAppCleaneddata.objects.filter(
+                                device=device,
+                                e_key=e_key,
+                                clean_method=method_obj,
+                                datetime__in=datetimes
+                            ).values_list("datetime", flat=True)
+                        )
+
+                        # 构建待插入对象列表
+                        objs_to_create = [
+                            RestAdminAppCleaneddata(
+                                device=device,
+                                e_key=e_key,
+                                clean_method=method_obj,
+                                datetime=dt,
+                                e_value=round(val, 4)
+                            )
+                            for dt, val in zip(datetimes, cleaned_values)
+                            if val is not None and dt not in existing_times
+                        ]
+
+                        if objs_to_create:
+                            RestAdminAppCleaneddata.objects.bulk_create(objs_to_create, batch_size=1000)
+
+                        logger.info(f"[完成] 设备 {device.device_id} - 参数 {e_key} - 方法 {method_key} 清洗完成，新增 {len(objs_to_create)} 条")
+            except Exception as e:
+                logger.error(f"[错误] 设备 {device.device_id} 清洗失败: {e}")
+
+    except Exception as e:
+        logger.error(f"[致命错误] 历史趋势清洗任务失败: {e}")
+    else:
+        logger.info("[任务] 历史趋势拟合清洗全部完成。")

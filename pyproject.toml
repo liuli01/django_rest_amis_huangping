@@ -18,5 +18,7 @@ dependencies = [
     "psycopg2-binary>=2.9.10",
     "pyecharts>=2.0.8",
     "python-dotenv>=1.1.1",
+    "scipy>=1.16.0",
+    "statsmodels>=0.14.4",
     "whitenoise>=6.9.0",
 ]

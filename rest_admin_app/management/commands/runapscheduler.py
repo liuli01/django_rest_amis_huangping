@@ -9,7 +9,7 @@ from django.core.management.base import BaseCommand
 from django_apscheduler.jobstores import DjangoJobStore
 from django_apscheduler.models import DjangoJobExecution
 from django_apscheduler import util
-from rest_admin_app.scheduler import my_job,fetch_device_data,clean_device_data
+from rest_admin_app.scheduler import my_job,fetch_device_data,clean_device_data,history_trend_clean_all
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +58,8 @@ class Command(BaseCommand):
     logger.info("Added job 'fetch_device_data'.")
 
 
+
+
     scheduler.add_job(
             clean_device_data,
             trigger=IntervalTrigger(minutes=10),
@@ -65,6 +67,16 @@ class Command(BaseCommand):
             name="每10分钟清洗一次数据",
             replace_existing=True,
         )
+    
+
+    scheduler.add_job(
+            history_trend_clean_all,
+            trigger=IntervalTrigger(minutes=10),
+            id="trend_fit_all_history",
+            name="每10分钟清洗一次数据",
+            replace_existing=True,
+        )
+    
 
 
     scheduler.add_job(

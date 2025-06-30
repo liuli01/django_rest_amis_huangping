@@ -67,12 +67,12 @@ def device_raw_vs_cleaned(device_name: str, e_name: str, method_name: str):
     print(f"设备: {device}, 清洗方法: {method}, 指标 : {e_key}")
 
     # 原始数据
-    raw_qs = RestAdminAppRawdata.objects.filter(device=device, e_name=e_name).order_by("datetime")
+    raw_qs = RestAdminAppRawdata.objects.filter(device=device, e_name=e_name).order_by("datetime")[:5000]
     raw_dict = {r.datetime.strftime("%Y-%m-%d %H:%M"): r.e_value for r in raw_qs}
     e_unit= RestAdminAppRawdata.objects.filter(device=device, e_name=e_name).first().e_unit
 
     # 清洗数据
-    clean_qs = RestAdminAppCleaneddata.objects.filter(device=device, clean_method=method, e_key=e_key ).order_by("datetime")
+    clean_qs = RestAdminAppCleaneddata.objects.filter(device=device, clean_method=method, e_key=e_key ).order_by("datetime")[:5000]
     clean_dict = {c.datetime.strftime("%Y-%m-%d %H:%M"): c.e_value for c in clean_qs}
     
 
@@ -86,7 +86,7 @@ def device_raw_vs_cleaned(device_name: str, e_name: str, method_name: str):
         Line()
         .add_xaxis(common_times)
         .add_yaxis("原始数据", raw_values, is_smooth=True, linestyle_opts=opts.LineStyleOpts(type_="solid"),label_opts=opts.LabelOpts(is_show=False, position="top"))
-        .add_yaxis("清洗数据", clean_values, is_smooth=True, linestyle_opts=opts.LineStyleOpts(type_="dashed"),label_opts=opts.LabelOpts(is_show=False, position="top"))
+        .add_yaxis("清洗数据", clean_values, is_smooth=True, linestyle_opts=opts.LineStyleOpts(type_="dashed",color="#FF0000"),label_opts=opts.LabelOpts(is_show=False, position="top"))
         .set_global_opts(
             title_opts=opts.TitleOpts(title=f"{device_name} - {e_name} 数据对比", subtitle=f"单位 {e_unit}"),
             xaxis_opts=opts.AxisOpts(name="时间", type_="category", boundary_gap=False),
