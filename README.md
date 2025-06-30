@@ -140,17 +140,20 @@ python manage.py changepassword admin
 /admin 生成rest服务，生成json服务
 /amis-api/ 替换 django-rest-admin的服务地址/api/进行访问
 ```
-## 数据库
-# 优先使用postgresql的驱动安装（支持时区）
+# 数据库
+## 优先使用postgresql的驱动安装（支持时区）
 ```
 uv add psycopg2-binary
 ```
-# 慎用mysqlclient(C语言开发速度快，不支持时区，TZ=False，会报错)
+## 慎用mysqlclient(C语言开发速度快，不支持时区，TZ=False，会报错)
 ```
 apt-get install python3-dev default-libmysqlclient-dev build-essential pkg-confi
 uv add mysqlclient
 ```
-## 
+## 导出requirements.txt
+```
+uv export --format requirements-txt -o requirements.txt
+```
 
 
 # 慎用mysqlclient(C语言开发速度快，不支持时区，TZ=False，会报错)
@@ -186,6 +189,9 @@ python manage.py init_clean_methods_and_devices
 
 # 项目地址
 ```
-http://127.0.0.1:8000/echarts/chart/device_raw_vs_cleaned/
+数据清洗页面地址
 http://127.0.0.1:8000/water-quality/
+
+图表地址
+http://127.0.0.1:8000/echarts/chart/device_raw_vs_cleaned/
 ```

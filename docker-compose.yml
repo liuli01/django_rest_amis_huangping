@@ -3,17 +3,21 @@ version: '3.9'
 services:
   web:
     build: .
+    image: liuli01/django_huangping_project:latest
     container_name: django_web
     ports:
       - "8000:8000"
+    environment:
+      - APP_MODE=web
     volumes:
       - .:/app
     depends_on:
       - scheduler
 
   scheduler:
-    build: .
+    image: liuli01/django_huangping_project:latest
     container_name: django_scheduler
-    command: ["python", "manage.py", "runapscheduler"]
+    environment:
+      - APP_MODE=scheduler
     volumes:
       - .:/app
