@@ -72,7 +72,7 @@ class Command(BaseCommand):
     scheduler.add_job(
             history_trend_clean_all,
             trigger=IntervalTrigger(minutes=10),
-            id="trend_fit_all_history",
+            id="history_trend_clean_all",
             name="每10分钟清洗一次数据",
             replace_existing=True,
         )
