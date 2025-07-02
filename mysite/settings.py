@@ -28,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-hc^0%++&)5@q7&rnjv9g94p_4x-gt@j11-4e172-^7#c_g=v&b'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", "True") 
+DEBUG = os.environ.get('DEBUG', 'True')
 
 ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = ['http://*', 'https://*']
@@ -77,6 +77,7 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # 切换到nginx后注释掉，必须放在第二位
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -85,7 +86,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     'drf_api_logger.middleware.api_logger_middleware.APILoggerMiddleware', 
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # 切换到nginx后注释掉
+    
 ]
 
 ROOT_URLCONF = 'mysite.urls'
