@@ -124,7 +124,7 @@ def spline_trend_fit(values, s=0.5):
         return values
 
 
-def hourly_average(values, freq_minutes=5):
+def hourly_average(values, freq_minutes=10):
     """
     按小时平均清洗：将每小时的所有数据点替换为该小时的平均值。
     
