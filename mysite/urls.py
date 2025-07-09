@@ -21,7 +21,8 @@ from rest_admin_app.views import (
     CleanedDataCompareView,
     CleanedDataExportView,
     FilterOptionsView,
-    water_quality_view
+    water_quality_view,
+    export_cleaned_data
 
 )
 
@@ -39,6 +40,7 @@ urlpatterns = [
     path("api/filter-options/", FilterOptionsView.as_view(), name="filter_options"),
     path('api/cleaned-data-compare/', CleanedDataCompareView.as_view(), name='cleaned_data_compare'),
     path('water-quality/', water_quality_view, name='water-quality'),
+    path('echarts/export_data/', export_cleaned_data, name='export_data'),
 
 ]
 

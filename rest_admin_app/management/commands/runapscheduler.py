@@ -68,12 +68,15 @@ class Command(BaseCommand):
             replace_existing=True,
         )
     
+     # 立刻执行一次
+    logger.info("启动时立即执行 history_trend_clean_all")
+    history_trend_clean_all()
 
     scheduler.add_job(
             history_trend_clean_all,
-            trigger=IntervalTrigger(minutes=10),
+            trigger=CronTrigger(hour="0", minute="0"),  # 每天午夜
             id="history_trend_clean_all",
-            name="每10分钟清洗一次数据",
+            name="每天午夜清洗一次数据",
             replace_existing=True,
         )
     

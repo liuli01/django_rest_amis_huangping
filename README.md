@@ -191,7 +191,8 @@ python manage.py init_clean_methods_and_devices
 ```
 数据清洗页面地址
 http://127.0.0.1:8000/water-quality/
-
+映射地址
+https://hpws.csceccloud.net:8443/water-quality/
 图表地址
 http://127.0.0.1:8000/echarts/chart/device_raw_vs_cleaned/
 ```

@@ -109,12 +109,16 @@ def clean_device_data():
 
 
 @close_old_connections
-def history_trend_clean_all(method_keys=["trend_fit", "savgol","ewma","median_avg","lowess","spline"]):
+def history_trend_clean_all(method_keys=CLEAN_METHODS.keys()):
     """
+    清空 CleanedData 表后，对所有设备、参数执行历史趋势拟合清洗
     对所有设备、所有参数的历史数据执行 trend_fit、savgol 等趋势拟合清洗，并批量写入 CleanedData 表
     """
     logger.info("[任务] 开始执行历史趋势拟合清洗任务...")
     try:
+        # 全表删除
+        RestAdminAppCleaneddata.objects.all().delete()
+        logger.info("[清理] 已清空 CleanedData 表全部历史数据")
         # 拉取数据库中已注册的方法对象
         method_map = {
             m.method_key: m
@@ -194,3 +198,4 @@ def history_trend_clean_all(method_keys=["trend_fit", "savgol","ewma","median_av
         logger.error(f"[致命错误] 历史趋势清洗任务失败: {e}")
     else:
         logger.info("[任务] 历史趋势拟合清洗全部完成。")
+

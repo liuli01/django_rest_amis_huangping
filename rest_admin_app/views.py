@@ -188,6 +188,67 @@ class FilterOptionsView(APIView):
         return Response({"status": 0, "msg": "ok", "data": response_data})
 
 
+from django.http import HttpResponse
+from rest_admin_app.models import RestAdminAppCleaneddata
+import csv
+def export_cleaned_data(request):
+    device_name = request.GET.get("device")
+    e_name = request.GET.get("indicator")  # 传中文名
+    method_name = request.GET.get("method")
+    start = request.GET.get("start")
+    end = request.GET.get("end")
+
+    if not all([device_name, e_name, method_name, start, end]):
+        return HttpResponse("缺少必要参数", status=400)
+
+    try:
+        device = RestAdminAppDevice.objects.get(name=device_name)
+        method = RestAdminAppCleanmethod.objects.get(method_name=method_name)
+    except RestAdminAppDevice.DoesNotExist:
+        return HttpResponse("设备不存在", status=404)
+    except RestAdminAppCleanmethod.DoesNotExist:
+        return HttpResponse("清洗方法不存在", status=404)
+
+    start_dt = parse_datetime(start)
+    end_dt = parse_datetime(end)
+    if not start_dt or not end_dt:
+        return HttpResponse("时间格式错误，应为 ISO 格式", status=400)
+
+    # 获取 e_key 列表（从 e_name 反查）
+    raw_qs = RestAdminAppRawdata.objects.filter(e_name=e_name)
+    e_keys = list(raw_qs.values_list("e_key", flat=True).distinct())
+    e_key_to_name = {obj.e_key: obj.e_name for obj in raw_qs.only("e_key", "e_name")}
+
+    if not e_keys:
+        return HttpResponse(f"未找到指标 {e_name} 对应的 e_key", status=404)
+
+    queryset = RestAdminAppCleaneddata.objects.filter(
+        device=device,
+        clean_method=method,
+        e_key__in=e_keys,
+        datetime__range=(start_dt, end_dt)
+    ).order_by("datetime")
+
+    if not queryset.exists():
+        return HttpResponse("没有匹配的清洗数据", status=404)
+
+    response = HttpResponse(content_type='text/csv')
+    filename = f"{device_name}_{e_name}_{method_name}.csv".replace(" ", "_")
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+    writer = csv.writer(response)
+    writer.writerow(['时间', '设备', '指标', '清洗方法', '值'])
+
+    for row in queryset:
+        writer.writerow([
+            row.datetime.strftime('%Y-%m-%d %H:%M:%S'),
+            device.name,
+            e_key_to_name.get(row.e_key, row.e_key),  # 优先用中文名
+            method.method_name,
+            row.e_value
+        ])
+    return response
+
 
 # water_monitor/views.py
 from django.shortcuts import render

@@ -2,91 +2,71 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>数据可视化控制面板</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据可视化控制面板</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 10px;
+            position: relative; /* 为全屏按钮的绝对定位提供参考 */
         }
-
         .container {
             max-width: 1200px;
             margin: 0 auto;
         }
-
         .controls {
             margin-bottom: 15px;
             padding: 15px;
             background-color: #f8f9fa;
             border-radius: 5px;
             display: flex;
-            flex-wrap: wrap;
             gap: 15px;
+            flex-wrap: wrap;
         }
-
         .control-group {
             flex: 1;
             min-width: 200px;
         }
-
         label {
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
         }
-
-        select, input[type="datetime-local"] {
+        select {
             width: 100%;
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
         }
-
-        iframe {
-            width: 100%;
-            height: 800px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
         .fullscreen-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
+            position: fixed; /* 固定在视窗中 */
+            bottom: 20px;    /* 距离底部20px */
+            right: 20px;     /* 距离右侧20px */
             padding: 8px 15px;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            z-index: 100;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 100;    /* 确保按钮在最上层 */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* 添加阴影增强视觉效果 */
         }
-
         .fullscreen-btn:hover {
             background-color: #45a049;
         }
-
-        .export-btn {
-            padding: 8px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 23px;
+        iframe {
             width: 100%;
-        }
-
-        .export-btn:hover {
-            background-color: #0056b3;
+            height: 800px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- 移除了标题元素 -->
+        
         <div class="controls">
             <form id="chartForm" style="width: 100%; display: flex; gap: 15px; flex-wrap: wrap;">
                 <div class="control-group">
@@ -99,7 +79,7 @@
                         <option value="管网监测点5">管网监测点5</option>
                     </select>
                 </div>
-
+                
                 <div class="control-group">
                     <label for="indicator">选择指标:</label>
                     <select id="indicator" name="indicator">
@@ -116,7 +96,7 @@
                         <option value="信号强度">信号强度</option>
                     </select>
                 </div>
-
+                
                 <div class="control-group">
                     <label for="method">选择清洗方法:</label>
                     <select id="method" name="method">
@@ -124,101 +104,93 @@
                         <option value="中值+滑动平均组合滤波">中值+滑动平均组合滤波</option>
                         <option value="指数加权移动平均">指数加权移动平均</option>
                         <option value="SG滤波">SG滤波</option>
+                        
                         <option value="LOWESS局部回归拟合">LOWESS局部回归拟合</option>
                         <option value="三次样条拟合">三次样条拟合</option>
                         <option value="多项式拟合">多项式拟合</option>
+                        
+                        
+                        <!-- <option value="中值滤波">中值滤波</option> -->
+                        <!-- <option value="Z-Score滤波">Z-Score滤波</option>
+                        <option value="滑动平均">滑动平均</option> -->
+
                     </select>
-                </div>
-
-                <div class="control-group">
-                    <label for="startTime">开始时间:</label>
-                    <input type="datetime-local" id="startTime" name="startTime">
-                </div>
-
-                <div class="control-group">
-                    <label for="endTime">结束时间:</label>
-                    <input type="datetime-local" id="endTime" name="endTime">
-                </div>
-
-                <div class="control-group" style="align-self: flex-end;">
-                    <button type="button" id="exportBtn" class="export-btn">导出数据</button>
                 </div>
             </form>
         </div>
-
-        <iframe id="chartFrame" src="http://127.0.0.1:8000/echarts/chart/device_raw_vs_cleaned/device_name/管网监测点1/e_name/氨氮/method_name/小时平均/" allowfullscreen></iframe>
+        
+        <!-- 移除了原来的按钮位置 -->
+        
+        <iframe id="chartFrame" src="http://127.0.0.1:8000/echarts/chart/device_raw_vs_cleaned/device_name/管网监测点1/e_name/氨氮/method_name/小时平均/" 
+                allowfullscreen></iframe>
     </div>
 
+    <!-- 将按钮移到iframe之后 -->
     <button id="fullscreenBtn" class="fullscreen-btn">全屏显示</button>
 
     <script>
+        // 获取DOM元素
         const deviceSelect = document.getElementById('device');
         const indicatorSelect = document.getElementById('indicator');
         const methodSelect = document.getElementById('method');
         const chartFrame = document.getElementById('chartFrame');
         const fullscreenBtn = document.getElementById('fullscreenBtn');
-        const startTimeInput = document.getElementById('startTime');
-        const endTimeInput = document.getElementById('endTime');
-        const exportBtn = document.getElementById('exportBtn');
-
+        
+        // 监听下拉框变化事件
         deviceSelect.addEventListener('change', updateChart);
         indicatorSelect.addEventListener('change', updateChart);
         methodSelect.addEventListener('change', updateChart);
-
+        
+        // 更新iframe中的图表URL
         function updateChart() {
             const device = encodeURIComponent(deviceSelect.value);
             const indicator = encodeURIComponent(indicatorSelect.value);
             const method = encodeURIComponent(methodSelect.value);
+            
             const chartUrl = `http://127.0.0.1:8000/echarts/chart/device_raw_vs_cleaned/device_name/${device}/e_name/${indicator}/method_name/${method}/`;
             chartFrame.src = chartUrl;
         }
-
+        
+        // 全屏控制
         fullscreenBtn.addEventListener('click', toggleFullscreen);
-
+        
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
+                // 进入全屏
                 if (chartFrame.requestFullscreen) {
                     chartFrame.requestFullscreen();
-                } else if (chartFrame.webkitRequestFullscreen) {
+                } else if (chartFrame.webkitRequestFullscreen) { /* Safari */
                     chartFrame.webkitRequestFullscreen();
-                } else if (chartFrame.msRequestFullscreen) {
+                } else if (chartFrame.msRequestFullscreen) { /* IE11 */
                     chartFrame.msRequestFullscreen();
                 }
+                fullscreenBtn.textContent = '退出全屏';
             } else {
+                // 退出全屏
                 if (document.exitFullscreen) {
                     document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
+                } else if (document.webkitExitFullscreen) { /* Safari */
                     document.webkitExitFullscreen();
-                } else if (document.msExitFullscreen) {
+                } else if (document.msExitFullscreen) { /* IE11 */
                     document.msExitFullscreen();
                 }
+                fullscreenBtn.textContent = '全屏显示';
             }
         }
-
+        
+        // 监听全屏状态变化
         document.addEventListener('fullscreenchange', handleFullscreenChange);
         document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
         document.addEventListener('mozfullscreenchange', handleFullscreenChange);
         document.addEventListener('MSFullscreenChange', handleFullscreenChange);
-
+        
         function handleFullscreenChange() {
-            fullscreenBtn.textContent = document.fullscreenElement ? '退出全屏' : '全屏显示';
-        }
-
-        exportBtn.addEventListener('click', function () {
-            const device = encodeURIComponent(deviceSelect.value);
-            const indicator = encodeURIComponent(indicatorSelect.value);
-            const method = encodeURIComponent(methodSelect.value);
-            const start = startTimeInput.value;
-            const end = endTimeInput.value;
-
-            if (!start || !end) {
-                alert("请选择起止时间！");
-                return;
+            if (document.fullscreenElement) {
+                fullscreenBtn.textContent = '退出全屏';
+            } else {
+                fullscreenBtn.textContent = '全屏显示';
             }
-
-            const exportUrl = `http://127.0.0.1:8000/echarts/export_data/?device=${device}&indicator=${indicator}&method=${method}&start=${start}&end=${end}`;
-            window.open(exportUrl, '_blank');
-        });
+        }
     </script>
 </body>
 </html>

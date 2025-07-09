@@ -33,8 +33,14 @@ from django_echarts.entities.uri import ParamsConfig
 #     )
 #     return bar
 
+from datetime import datetime, timedelta
 
-
+# 时间范围设置
+start_time = datetime(2025, 6, 30, 0, 0, 0)
+end_time = datetime(2025, 7, 2, 0, 0, 0) 
+# 近七天
+start_time = datetime.now() - timedelta(days=30)
+end_time = datetime.now()
 
 device_name_list= RestAdminAppDevice.objects.values_list('name', flat=True).distinct()
 device_name_list = list(device_name_list) 
@@ -67,12 +73,16 @@ def device_raw_vs_cleaned(device_name: str, e_name: str, method_name: str):
     print(f"设备: {device}, 清洗方法: {method}, 指标 : {e_key}")
 
     # 原始数据
-    raw_qs = RestAdminAppRawdata.objects.filter(device=device, e_name=e_name).order_by("datetime")[:5000]
+    raw_qs = RestAdminAppRawdata.objects.filter(device=device, e_name=e_name,
+    datetime__gte=start_time,
+    datetime__lt=end_time).order_by("datetime")[:8000]
     raw_dict = {r.datetime.strftime("%Y-%m-%d %H:%M"): r.e_value for r in raw_qs}
     e_unit= RestAdminAppRawdata.objects.filter(device=device, e_name=e_name).first().e_unit
 
     # 清洗数据
-    clean_qs = RestAdminAppCleaneddata.objects.filter(device=device, clean_method=method, e_key=e_key ).order_by("datetime")[:5000]
+    clean_qs = RestAdminAppCleaneddata.objects.filter(device=device, clean_method=method, e_key=e_key,
+    datetime__gte=start_time,
+    datetime__lt=end_time ).order_by("datetime")[:8000]
     clean_dict = {c.datetime.strftime("%Y-%m-%d %H:%M"): c.e_value for c in clean_qs}
     
 
@@ -92,7 +102,8 @@ def device_raw_vs_cleaned(device_name: str, e_name: str, method_name: str):
             xaxis_opts=opts.AxisOpts(name="时间", type_="category", boundary_gap=False),
             yaxis_opts=opts.AxisOpts(name="数值"),
             tooltip_opts=opts.TooltipOpts(trigger="axis"),
-            datazoom_opts=[opts.DataZoomOpts()],
+            
+            datazoom_opts=[opts.DataZoomOpts(range_start=0, range_end=100), opts.DataZoomOpts(type_="slider")],
             toolbox_opts=opts.ToolboxOpts(is_show=False)
             
         )

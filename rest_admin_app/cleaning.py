@@ -1,5 +1,4 @@
 
-# yourapp/cleaning.py
 import numpy as np
 import pandas as pd
 from statsmodels.nonparametric.smoothers_lowess import lowess
@@ -7,12 +6,6 @@ from scipy.signal import savgol_filter
 from scipy.interpolate import UnivariateSpline
 import logging
 logger = logging.getLogger(__name__)
-
-def moving_average(values, window=3):
-    return pd.Series(values).rolling(window=window, min_periods=10).mean().tolist()
-
-def median_filter(values, window=3):
-    return pd.Series(values).rolling(window=window, min_periods=10, center=True).median().tolist()
 
 def z_score_filter(values, threshold=2.0):
     series = pd.Series(values)
@@ -28,11 +21,11 @@ def z_score_filter(values, threshold=2.0):
 
 
 
-def trend_fit(values, degree=5):
+def trend_fit(values, degree=3):
     """
     多项式趋势拟合，返回拟合后的平滑曲线
     :param values: 原始值列表
-    :param degree: 多项式拟合阶数（推荐 2~5）
+    :param degree: 多项式拟合阶数（推荐 2~3）
     :return: 拟合后的值列表
     """
     x = np.arange(len(values))
@@ -130,22 +123,29 @@ def spline_trend_fit(values, s=0.5):
         logger.error(f"[spline_trend_fit] 拟合失败: {e}")
         return values
 
+
+def hourly_average(values, freq_minutes=5):
+    """
+    按小时平均清洗：将每小时的所有数据点替换为该小时的平均值。
+    
+    :param values: 原始数据（list）
+    :param freq_minutes: 原始数据的时间间隔（分钟），默认 5 分钟
+    :return: list，长度与原始一致，已按小时填充均值
+    """
+    if not values or len(values) < 2:
+        return values
+
+    try:
+        df = pd.DataFrame({'value': values})
+        df['hour'] = (df.index * freq_minutes) // 60
+        df['avg'] = df.groupby('hour')['value'].transform('mean')
+        return df['avg'].tolist()
+    except Exception as e:
+        logger.error(f"[hourly_average] 清洗失败: {e}")
+        return values
+
+
 CLEAN_METHODS = {
-    "moving_avg": {
-        "name": "滑动平均",
-        "func": moving_average,
-        "describe": "按固定窗口对数据进行平滑处理，适用于趋势平稳的数据"
-    },
-    "median": {
-        "name": "中值滤波",
-        "func": median_filter,
-        "describe": "通过窗口中值剔除突变异常，适合去除尖刺型噪声"
-    },
-    "zscore": {
-        "name": "Z-Score滤波",
-        "func": z_score_filter,
-        "describe": "基于标准差判断异常点并剔除，适合高斯型数据"
-    },
     "trend_fit": {
         "name": "多项式拟合",
         "func": trend_fit,
@@ -175,5 +175,10 @@ CLEAN_METHODS = {
         "name": "三次样条拟合",
         "func": spline_trend_fit,
         "describe": "构造自然平滑曲线，适合较连续、变化不剧烈的趋势拟合"
-    }
+    },
+    "hourly_avg": {
+    "name": "小时平均",
+    "func": hourly_average,
+    "describe": "按小时将数据进行聚合平均处理，适合观察小时级别趋势变化"
+}
 }
