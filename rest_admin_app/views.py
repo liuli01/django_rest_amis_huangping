@@ -191,6 +191,80 @@ class FilterOptionsView(APIView):
 from django.http import HttpResponse
 from rest_admin_app.models import RestAdminAppCleaneddata
 import csv
+from datetime import timedelta
+from django.db.models import Avg
+# def export_cleaned_data(request):
+#     device_name = request.GET.get("device")
+#     e_name = request.GET.get("indicator")  # 中文名
+#     method_name = request.GET.get("method")
+#     start = request.GET.get("start")
+#     end = request.GET.get("end")
+
+#     if not all([device_name, e_name, method_name, start, end]):
+#         return HttpResponse("缺少必要参数", status=400)
+
+#     try:
+#         device = RestAdminAppDevice.objects.get(name=device_name)
+#         method = RestAdminAppCleanmethod.objects.get(method_name=method_name)
+#     except RestAdminAppDevice.DoesNotExist:
+#         return HttpResponse("设备不存在", status=404)
+#     except RestAdminAppCleanmethod.DoesNotExist:
+#         return HttpResponse("清洗方法不存在", status=404)
+
+#     start_dt = parse_datetime(start)
+#     end_dt = parse_datetime(end)
+#     if not start_dt or not end_dt:
+#         return HttpResponse("时间格式错误，应为 ISO 格式", status=400)
+
+#     # 查询 e_key
+#     raw_qs = RestAdminAppRawdata.objects.filter(e_name=e_name)
+#     e_keys = list(raw_qs.values_list("e_key", flat=True).distinct())
+#     e_key_to_name = {obj.e_key: obj.e_name for obj in raw_qs.only("e_key", "e_name")}
+
+#     if not e_keys:
+#         return HttpResponse(f"未找到指标 {e_name} 对应的 e_key", status=404)
+
+#     # 查询清洗数据
+#     cleaned_qs = RestAdminAppCleaneddata.objects.filter(
+#         device=device,
+#         clean_method=method,
+#         e_key__in=e_keys,
+#         datetime__range=(start_dt, end_dt)
+#     ).order_by("datetime")
+
+#     if not cleaned_qs.exists():
+#         return HttpResponse("没有匹配的清洗数据", status=404)
+
+#     # 建立 { (e_key, datetime): 原始值 } 映射
+#     rawdata_map = {
+#         (r.e_key, r.datetime): r.e_value
+#         for r in RestAdminAppRawdata.objects.filter(
+#             device=device,
+#             e_key__in=e_keys,
+#             datetime__range=(start_dt, end_dt)
+#         )
+#     }
+
+#     # 构建 CSV 响应
+#     response = HttpResponse(content_type='text/csv')
+#     filename = f"{device_name}_{e_name}_{method_name}_with_raw.csv".replace(" ", "_")
+#     response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+#     writer = csv.writer(response)
+#     writer.writerow(['时间', '设备', '指标', '清洗方法', '原始值', '清洗值'])
+
+#     for row in cleaned_qs:
+#         raw_value = rawdata_map.get((row.e_key, row.datetime), "")
+#         writer.writerow([
+#             row.datetime.strftime('%Y-%m-%d %H:%M:%S'),
+#             device.name,
+#             e_key_to_name.get(row.e_key, row.e_key),
+#             method.method_name,
+#             raw_value,
+#             row.e_value
+#         ])
+#     return response
+
 def export_cleaned_data(request):
     device_name = request.GET.get("device")
     e_name = request.GET.get("indicator")  # 中文名
@@ -214,7 +288,7 @@ def export_cleaned_data(request):
     if not start_dt or not end_dt:
         return HttpResponse("时间格式错误，应为 ISO 格式", status=400)
 
-    # 查询 e_key
+    # 获取 e_keys
     raw_qs = RestAdminAppRawdata.objects.filter(e_name=e_name)
     e_keys = list(raw_qs.values_list("e_key", flat=True).distinct())
     e_key_to_name = {obj.e_key: obj.e_name for obj in raw_qs.only("e_key", "e_name")}
@@ -222,7 +296,6 @@ def export_cleaned_data(request):
     if not e_keys:
         return HttpResponse(f"未找到指标 {e_name} 对应的 e_key", status=404)
 
-    # 查询清洗数据
     cleaned_qs = RestAdminAppCleaneddata.objects.filter(
         device=device,
         clean_method=method,
@@ -233,34 +306,62 @@ def export_cleaned_data(request):
     if not cleaned_qs.exists():
         return HttpResponse("没有匹配的清洗数据", status=404)
 
-    # 建立 { (e_key, datetime): 原始值 } 映射
-    rawdata_map = {
-        (r.e_key, r.datetime): r.e_value
-        for r in RestAdminAppRawdata.objects.filter(
-            device=device,
-            e_key__in=e_keys,
-            datetime__range=(start_dt, end_dt)
-        )
-    }
-
-    # 构建 CSV 响应
+    # 响应
     response = HttpResponse(content_type='text/csv')
-    filename = f"{device_name}_{e_name}_{method_name}_with_raw.csv".replace(" ", "_")
+    filename = f"{device_name}_{e_name}_{method_name}_export.csv".replace(" ", "_")
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
-
     writer = csv.writer(response)
-    writer.writerow(['时间', '设备', '指标', '清洗方法', '原始值', '清洗值'])
 
-    for row in cleaned_qs:
-        raw_value = rawdata_map.get((row.e_key, row.datetime), "")
-        writer.writerow([
-            row.datetime.strftime('%Y-%m-%d %H:%M:%S'),
-            device.name,
-            e_key_to_name.get(row.e_key, row.e_key),
-            method.method_name,
-            raw_value,
-            row.e_value
-        ])
+    is_hourly_avg = method_name == "小时平均"
+
+    if is_hourly_avg:
+        writer.writerow(['时间', '设备', '指标', '清洗方法', '清洗值'])
+
+        seen_timestamps = set()
+        for row in cleaned_qs:
+            # 只保留每小时一条
+            dt_str = row.datetime.strftime("%Y/%m/%d %H:00:00")  # 注意统一格式
+            if dt_str in seen_timestamps:
+                continue
+            seen_timestamps.add(dt_str)
+
+            writer.writerow([
+                dt_str,
+                device.name,
+                e_key_to_name.get(row.e_key, row.e_key),
+                method.method_name,
+                round(row.e_value, 4)
+            ])  
+    else:
+        writer.writerow(['时间', '设备', '指标', '清洗方法', '原始值', '清洗值'])
+
+        # 获取原始数据映射
+        raw_map = {
+            (r.e_key, r.datetime): r.e_value
+            for r in RestAdminAppRawdata.objects.filter(
+                device=device,
+                e_key__in=e_keys,
+                datetime__range=(start_dt, end_dt)
+            )
+        }
+
+        seen = set()
+        for row in cleaned_qs:
+            dt_str = row.datetime.strftime("%Y-%m-%d %H:%M:%S")
+            key = (dt_str, round(row.e_value, 4))
+            if key in seen:
+                continue
+            seen.add(key)
+            raw_val = raw_map.get((row.e_key, row.datetime), "")
+            writer.writerow([
+                dt_str,
+                device.name,
+                e_key_to_name.get(row.e_key, row.e_key),
+                method.method_name,
+                raw_val,
+                row.e_value
+            ])
+
     return response
 
 # water_monitor/views.py
